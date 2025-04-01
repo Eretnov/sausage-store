@@ -39,7 +39,13 @@ sonarqube-backend-sast:
       - .sonar/cache
   script:
     - cd backend
-    - mvn clean verify sonar:sonar -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.projectKey=${SONAR_PROJECT_KEY_BACK} -Dsonar.login=${SONAR_LOGIN} -Dsonar.projectName=${SONAR_PROJECT_KEY} -Dsonar.qualitygate.wait=true
+    - >
+      mvn clean verify sonar:sonar 
+      -Dsonar.host.url=${SONARQUBE_URL} 
+      -Dsonar.projectKey=${SONAR_PROJECT_KEY_BACK} 
+      -Dsonar.login=${SONAR_LOGIN} 
+      -Dsonar.projectName=${SONAR_PROJECT_KEY} 
+      -Dsonar.qualitygate.wait=true
   allow_failure: true
   needs:
     - build-backend-code-job

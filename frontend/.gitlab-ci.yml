@@ -27,7 +27,13 @@ sonarqube-frontend-sast:
     paths:
       - .sonar/cache
   script:
-    - sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.projectKey=${SONAR_PROJECT_KEY_FRONT} -Dsonar.login=${SONAR_LOGIN} -Dsonar.sources -Dsonar.sources=frontend/src
+    - >
+      sonar-scanner 
+      -Dsonar.qualitygate.wait=true 
+      -Dsonar.host.url=${SONARQUBE_URL} 
+      -Dsonar.projectKey=${SONAR_PROJECT_KEY_FRONT} 
+      -Dsonar.login=${SONAR_LOGIN} 
+      -Dsonar.sources=frontend/src
   allow_failure: true
   needs:
     - build-frontend-code-job
