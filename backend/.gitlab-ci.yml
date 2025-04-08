@@ -8,9 +8,6 @@ build-backend-code-job:
   cache:
     paths:
       - ${CI_PROJECT_DIR}/.m2/repository
-  only:
-    changes:
-    - backend/**/*
   script:
     - cd backend
     - mvn package -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository
@@ -54,8 +51,6 @@ telegram-notification-backend:
   stage: notify
   rules:
     - if: $CI_COMMIT_MESSAGE =~ /send notification/
-      changes: 
-        - backend/**/*
   script:
     - >
       curl -X POST -H "Content-type: application/json" 

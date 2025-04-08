@@ -1,8 +1,19 @@
-include:
-  - 'backend/.gitlab-ci.yml'
-  - 'frontend/.gitlab-ci.yml'
-  - template: Security/SAST.gitlab-ci.yml
 stages:
   - build
   - test
   - notify
+
+include:
+  - local: 'backend/.gitlab-ci.yml'
+    rules:
+    - changes:
+        - "backend/**/*"
+  - local: 'frontend/.gitlab-ci.yml'
+    rules:
+    - changes:
+        - "frontend/**/*"
+  - template: Security/SAST.gitlab-ci.yml
+    rules:
+    - changes:
+        - "frontend/**/*"
+        - "backend/**/*"
