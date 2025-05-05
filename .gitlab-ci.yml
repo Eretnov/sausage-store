@@ -1,4 +1,8 @@
 stages:
+  - build
+  - test
+  - notify
+  - release
   - module-pipelines
 
 include:
