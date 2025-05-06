@@ -12,6 +12,7 @@ stages:
   - test
   - release
   - notify
+  - deploy
 
 build-backend-code-job:
   stage: build
@@ -30,7 +31,6 @@ semgrep-sast:
   variables:
     COMPILE: "false"
     SAST_JAVA_VERSION: 11
-    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
   needs:
     - build-backend-code-job
 
@@ -79,3 +79,16 @@ release:
       -Dmaven.repo.local=${MAVEN_REPO_PATH}
   needs:
     - build-backend-code-job
+
+deploy:
+  stage: deploy
+  before_script:
+    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 600 ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - ssh ${DEV_USER}@${DEV_HOST} "id"
