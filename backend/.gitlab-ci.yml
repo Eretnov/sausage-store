@@ -74,9 +74,7 @@ release:
   script:
     - cd backend
     - >
-      mvn deploy -DskipTests -s settings.xml
-      -Dversion.application=${VERSION}
-      -Dmaven.repo.local=${MAVEN_REPO_PATH}
+      mvn deploy -DskipTests -s settings.xml -Dversion.application=${VERSION} -Dmaven.repo.local=${MAVEN_REPO_PATH}
   needs:
     - build-backend-code-job
 
