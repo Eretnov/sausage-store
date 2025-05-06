@@ -79,3 +79,5 @@ release:
       -Dmaven.repo.local=${MAVEN_REPO_PATH}
   needs:
     - build-backend-code-job
+
+#test build
