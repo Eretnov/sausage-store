@@ -21,7 +21,7 @@ build-backend-code-job:
     - mvn package -Dmaven.repo.local=${MAVEN_REPO_PATH} -Dversion.application=${VERSION}
   artifacts:
     paths:
-      - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
+      - backend/target/sausage-store-${VERSION}.jar
 
 include:
   - template: Security/SAST.gitlab-ci.yml
@@ -73,9 +73,10 @@ release:
   stage: release
   script:
     - cd backend
-    - echo ${VERSION}
     - >
-      mvn deploy -DskipTests -s settings.xml -Dversion.application=${VERSION} -Dmaven.repo.local=${MAVEN_REPO_PATH}
+      mvn deploy -DskipTests -s settings.xml 
+      -Dversion.application=${VERSION} 
+      -Dmaven.repo.local=${MAVEN_REPO_PATH}
   needs:
     - build-backend-code-job
 
