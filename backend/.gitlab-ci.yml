@@ -22,12 +22,17 @@ build-backend-code-job:
     paths:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
 
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
 semgrep-sast:
-  extends: .semgrep-sast
+  stage: test
   variables:
     COMPILE: "false"
     SAST_JAVA_VERSION: 11
     MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
+  needs:
+    - build-backend-code-job
 
 sonarqube-backend-sast:
   stage: test

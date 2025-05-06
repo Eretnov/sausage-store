@@ -1,9 +1,5 @@
 stages:
   - module-pipelines
-  - test
-
-include:
-  - template: Security/SAST.gitlab-ci.yml
 
 frontend:
   stage: module-pipelines
