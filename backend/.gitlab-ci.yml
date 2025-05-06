@@ -73,6 +73,7 @@ release:
   stage: release
   script:
     - cd backend
+    - echo ${VERSION}
     - >
       mvn deploy -DskipTests -s settings.xml -Dversion.application=${VERSION} -Dmaven.repo.local=${MAVEN_REPO_PATH}
   needs:
