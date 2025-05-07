@@ -13,4 +13,3 @@ Restart=always
 
 [Install]
 WantedBy=multi-user.target
-student@fhmqu9qeib0kn1af7mtn
