@@ -1,19 +1,20 @@
 stages:
-  - build
-  - test
-  - notify
+  - module-pipelines
 
-include:
-  - local: 'backend/.gitlab-ci.yml'
-    rules:
+frontend:
+  stage: module-pipelines
+  trigger:
+    include: "/frontend/.gitlab-ci.yml"
+    strategy: depend
+  rules:
     - changes:
-        - "backend/**/*"
-  - local: 'frontend/.gitlab-ci.yml'
-    rules:
+      - "frontend/**/*"
+
+backend:
+  stage: module-pipelines
+  trigger:
+    include: "/backend/.gitlab-ci.yml"
+    strategy: depend
+  rules:
     - changes:
-        - "frontend/**/*"
-  - template: Security/SAST.gitlab-ci.yml
-    rules:
-    - changes:
-        - "frontend/**/*"
-        - "backend/**/*"
+      - "backend/**/*"
