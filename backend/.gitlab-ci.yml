@@ -18,7 +18,11 @@ build-backend-code-job:
   stage: build
   script:
     - cd backend
-    - mvn package -Dmaven.repo.local=${MAVEN_REPO_PATH} -Dversion.application=${VERSION}
+    - >
+      mvn package 
+      -Dmaven.repo.local=${MAVEN_REPO_PATH} 
+      -Dversion.application=${VERSION} 
+      -Dspring.flyway.enabled=false
   artifacts:
     paths:
       - backend/target/sausage-store-${VERSION}.jar
