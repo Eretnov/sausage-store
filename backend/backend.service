@@ -1,12 +1,12 @@
 [Unit]
-Description=Backend Service
+Description=Sausage Store Backend Service
 After=network.target
 
 [Service]
-Description=Sausage Store Backend Service
 User=backend
 Group=backend
 
+EnvironmentFile=/var/sausage-store/backend.env
 Environment=REPORT_PATH=/var/sausage-store/reports
 Environment=LOG_PATH=/var/sausage-store/logs
 
