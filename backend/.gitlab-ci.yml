@@ -18,7 +18,11 @@ build-backend-code-job:
   stage: build
   script:
     - cd backend
-    - mvn package -Dmaven.repo.local=${MAVEN_REPO_PATH} -Dversion.application=${VERSION}
+    - >
+      mvn package 
+      -Dmaven.repo.local=${MAVEN_REPO_PATH} 
+      -Dversion.application=${VERSION} 
+      -Dspring.flyway.enabled=false
   artifacts:
     paths:
       - backend/target/sausage-store-${VERSION}.jar
@@ -53,6 +57,7 @@ sonarqube-backend-sast:
       -Dsonar.login=${SONAR_LOGIN} 
       -Dsonar.projectName=${SONAR_PROJECT_KEY} 
       -Dsonar.qualitygate.wait=true
+      -Dspring.flyway.enabled=false
   allow_failure: false
   needs:
     - build-backend-code-job
@@ -78,7 +83,7 @@ release:
       -Dversion.application=${VERSION} 
       -Dmaven.repo.local=${MAVEN_REPO_PATH}
   needs:
-    - build-backend-code-job
+    - sonarqube-backend-sast
 
 deploy:
   stage: deploy
@@ -97,5 +102,5 @@ deploy:
     name: staging_backend
     url: http://std-040-31.praktikum-services.tech/
   when: manual
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+#  rules:
+#    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
