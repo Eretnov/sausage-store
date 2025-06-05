@@ -102,5 +102,5 @@ deploy:
     name: staging_backend
     url: http://std-040-31.praktikum-services.tech/
   when: manual
-#  rules:
-#    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
