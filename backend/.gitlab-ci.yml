@@ -64,6 +64,7 @@ sonarqube-backend-sast:
     paths:
       - .sonar/cache
   script:
+    - unset SPRING_DATASOURCE_URL SPRING_DATASOURCE_USERNAME SPRING_DATASOURCE_PASSWORD SPRING_DATA_MONGODB_URI
     - cd backend
     - >
       mvn clean verify sonar:sonar 
@@ -113,6 +114,8 @@ release-image-backend:
     - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - crane tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA $VERSION
+  needs:
+    - build-image-backend
 
 deploy:
   stage: deploy
@@ -147,3 +150,6 @@ deploy-image-backend:
     - chmod 644 ~/.ssh/known_hosts
   script:
     - envsubst < ./backend/deploy_template.sh|ssh ${DEPLOY_USER}@${DEPLOY_HOST} 
+  needs:
+    - release-image-backend
+
