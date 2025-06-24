@@ -18,9 +18,9 @@ build-backend-code-job:
   stage: build
   script:
     - cd backend
-    - echo "$PG_ROOT_CRT"
+    - keytool -importcert -file "$CERT_YANDEX_CA" -alias yandex -cacerts -storepass changeit -noprompt
     - mkdir -p $HOME/.postgresql
-    - cp "${PG_ROOT_CRT}" "$HOME/.postgresql/root.crt"
+    - cp "$PG_ROOT_CRT" "$HOME/.postgresql/root.crt"
     - >
       mvn package 
       -Dmaven.repo.local=${MAVEN_REPO_PATH} 
