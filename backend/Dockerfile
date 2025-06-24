@@ -6,7 +6,6 @@ COPY *.xml ./
 RUN wget -O  YandexInternalRootCA.crt https://storage.yandexcloud.net/cloud-certs/CA.pem \
     && mvn package -Dversion.application=${VERSION} -Dmaven.test.skip=true
 
-# шаг релиза
 FROM bellsoft/liberica-runtime-container:jre-17-slim-musl
 ARG VERSION=${VERSION}
 WORKDIR /app
