@@ -34,7 +34,6 @@ build-image-backend:
     name: gcr.io/kaniko-project/executor:v1.9.0-debug
     entrypoint: [""]
   script:
-    - echo "test"
     - /kaniko/executor
       --context "${CI_PROJECT_DIR}/backend"
       --dockerfile "${CI_PROJECT_DIR}/backend/Dockerfile"

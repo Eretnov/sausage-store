@@ -83,7 +83,7 @@ release:
     - build-frontend-code-job
   when: manual
 
-release:
+release-image-frontend:
   variables:
     GIT_STRATEGY: none
   image:
@@ -131,5 +131,6 @@ deploy-image-frontend:
     - ssh ${DEV_USER}@${DEV_HOST} "mkdir -p /tmp/${CI_PROJECT_DIR}/frontend/"
     - scp ./frontend/default.conf ${DEV_USER}@${DEV_HOST}:/tmp/${CI_PROJECT_DIR}/frontend/default.conf
   script:
-    - envsubst < ./frontend/deploy_template.sh|ssh ${DEV_USER}@${DEV_HOST} 
-
+    - envsubst < ./frontend/deploy_template.sh|ssh ${DEV_USER}@${DEV_HOST}
+  needs:
+    - release-image-frontend
