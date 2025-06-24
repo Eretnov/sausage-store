@@ -68,6 +68,7 @@ release:
       ${NEXUS_REPO_URL}/${NEXUS_REPO_FRONTEND_NAME}/${VERSION}/sausage-store-${VERSION}.tar.gz
   needs:
     - build-frontend-code-job
+  when: manual
 
 deploy:
   stage: deploy

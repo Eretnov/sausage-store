@@ -9,6 +9,7 @@ frontend:
   rules:
     - changes:
       - "frontend/**/*"
+    - if: '$CI_PIPELINE_SOURCE == "push"'
 
 backend:
   stage: module-pipelines
@@ -18,3 +19,4 @@ backend:
   rules:
     - changes:
       - "backend/**/*"
+    - if: '$CI_PIPELINE_SOURCE == "push"'

@@ -27,3 +27,4 @@ replay_pid*
 # Custom files
 /.idea
 /.vscode
+backend/.env
