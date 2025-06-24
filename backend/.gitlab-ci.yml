@@ -18,6 +18,8 @@ build-backend-code-job:
   stage: build
   script:
     - cd backend
+    - mkdir -p $HOME/.postgresql
+    - cp "$PG_ROOT_CRT" "$HOME/.postgresql/root.crt"
     - >
       mvn package 
       -Dmaven.repo.local=${MAVEN_REPO_PATH} 
