@@ -17,6 +17,7 @@ stages:
 build-backend-code-job:
   stage: build
   script:
+    - unset SPRING_DATASOURCE_URL SPRING_DATASOURCE_USERNAME SPRING_DATASOURCE_PASSWORD SPRING_DATA_MONGODB_URI
     - cd backend
     - >
       mvn package 
@@ -26,6 +27,19 @@ build-backend-code-job:
   artifacts:
     paths:
       - backend/target/sausage-store-${VERSION}.jar
+
+build-image-backend:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/backend"
+      --dockerfile "${CI_PROJECT_DIR}/backend/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}/sausage-backend:$CI_COMMIT_SHA"
+      --build-arg VERSION=$VERSION
+      --cache=true
 
 include:
   - template: Security/SAST.gitlab-ci.yml
@@ -49,6 +63,7 @@ sonarqube-backend-sast:
     paths:
       - .sonar/cache
   script:
+    - unset SPRING_DATASOURCE_URL SPRING_DATASOURCE_USERNAME SPRING_DATASOURCE_PASSWORD SPRING_DATA_MONGODB_URI
     - cd backend
     - >
       mvn clean verify sonar:sonar 
@@ -84,6 +99,22 @@ release:
       -Dmaven.repo.local=${MAVEN_REPO_PATH}
   needs:
     - sonarqube-backend-sast
+  when: manual
+
+release-image-backend:
+  variables:
+    GIT_STRATEGY: none
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [ "" ]
+  cache: [ ]
+  stage: release
+  before_script:
+    - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - crane tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA $VERSION
+  needs:
+    - build-image-backend
 
 deploy:
   stage: deploy
@@ -104,3 +135,21 @@ deploy:
   when: manual
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy-image-backend:
+  stage: deploy
+  image: alpine:3.18
+  before_script:
+    - apk update
+    - apk add openssh-client bash gettext
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - envsubst < ./backend/deploy_template.sh|ssh ${DEV_USER}@${DEV_HOST} 
+  needs:
+    - release-image-backend
+
