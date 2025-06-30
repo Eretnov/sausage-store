@@ -132,5 +132,6 @@ deploy-image-frontend:
     - scp ./frontend/default.conf ${DEV_USER}@${DEV_HOST}:/tmp/${CI_PROJECT_DIR}/frontend/default.conf
   script:
     - envsubst < ./frontend/deploy_template.sh|ssh ${DEV_USER}@${DEV_HOST}
+  when: manual
   needs:
     - release-image-frontend
