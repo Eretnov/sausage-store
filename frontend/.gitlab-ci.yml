@@ -119,19 +119,22 @@ deploy:
 
 deploy-image-frontend:
   stage: deploy
-  image: alpine:3.18
+  image: docker:latest
   before_script:
-    - apk add openssh-client bash gettext
+    - apk update
+    - apk add docker-compose
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    - ssh ${DEV_USER}@${DEV_HOST} "mkdir -p /tmp/${CI_PROJECT_DIR}/frontend/"
-    - scp ./frontend/default.conf ${DEV_USER}@${DEV_HOST}:/tmp/${CI_PROJECT_DIR}/frontend/default.conf
+    - docker context create remote --docker host=${REMOTE_HOST}
   script:
-    - envsubst < ./frontend/deploy_template.sh|ssh ${DEV_USER}@${DEV_HOST}
-  when: manual
+    - docker context use remote  
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - docker rm -f sausage-frontend || true
+    - docker-compose -f docker-compose.yml up -d frontend
   needs:
     - release-image-frontend
+  when: manual

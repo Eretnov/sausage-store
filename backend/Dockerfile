@@ -1,4 +1,4 @@
-FROM maven:3.9.3-eclipse-temurin-20-alpine as builder
+FROM maven:3.9.3-eclipse-temurin-20-alpine AS builder
 ARG VERSION=${VERSION}
 WORKDIR /usr/src/app
 COPY ./src ./src

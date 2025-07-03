@@ -1,4 +1,4 @@
-FROM node:16.20.0-alpine3.18 as builder
+FROM node:16.20.0-alpine3.18 AS builder
 ARG VERSION=${VERSION}
 WORKDIR /usr/src/app
 COPY . .
