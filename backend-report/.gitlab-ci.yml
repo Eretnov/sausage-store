@@ -1,0 +1,109 @@
+variables:
+  VERSION: 1.0.${CI_PIPELINE_ID}
+
+stages:
+  - build
+  - test
+  - release
+  - deploy
+
+build-backend-report-job:
+  stage: build
+  image: golang:latest
+  variables:
+    DB: ${DB}
+    PORT: ${PORT} 
+  script:
+    - cd backend-report
+    - mkdir -p target
+    - go build -o target/backend-report-${VERSION} main.go
+    - go test ./app/services/health
+  artifacts:
+    paths:
+      - backend-report/target/backend-report-${VERSION}
+    
+build-image-backend-report:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/backend-report"
+      --dockerfile "${CI_PROJECT_DIR}/backend-report/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}/sausage-backend-report:$CI_COMMIT_SHA"
+      --build-arg VERSION=$VERSION
+      --cache=true
+
+include:
+  - remote: 'https://gitlab.com/gitlab-org/gitlab/-/raw/2851f4d5/lib/gitlab/ci/templates/Jobs/SAST.latest.gitlab-ci.yml'
+
+semgrep-sast:
+  stage: test
+  variables:
+    COMPILE: "false"
+  needs:
+    - build-backend-report-job
+  rules:
+    - if: $CI_COMMIT_BRANCH  
+
+sonarqube-backend-report-sast:
+  stage: test
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - >
+      sonar-scanner 
+      -Dsonar.host.url=${SONARQUBE_URL} 
+      -Dsonar.projectKey=${SONAR_PROJECT_KEY_REPORT} 
+      -Dsonar.login=${SONAR_LOGIN} 
+      -Dsonar.qualitygate.wait=true
+      -Dsonar.sources=backend-report
+  allow_failure: false
+  needs:
+    - build-backend-report-job
+
+release-image-backend-report:
+  variables:
+    GIT_STRATEGY: none
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [ "" ]
+  cache: [ ]
+  stage: release
+  before_script:
+    - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - crane tag $CI_REGISTRY_IMAGE/sausage-backend-report:$CI_COMMIT_SHA $VERSION
+  needs:
+    - build-image-backend-report
+
+deploy-image-backend-report:
+  stage: deploy
+  image: docker:latest
+  before_script:
+    - apk update
+    - apk add docker-compose 
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - docker context create remote --docker host=${REMOTE_HOST}
+  script:
+    - docker context use remote
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - docker rm -f sausage-backend-report || true
+    - docker-compose -f docker-compose.yml up -d backend-report
+  needs:
+    - release-image-backend-report
+  when: manual

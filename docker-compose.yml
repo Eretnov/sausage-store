@@ -1,0 +1,31 @@
+services:
+  backend:
+    image: ${CI_REGISTRY_IMAGE}/sausage-backend:$VERSION
+    container_name: sausage-backend
+    environment:
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATA_MONGODB_URI: ${SPRING_DATA_MONGODB_URI}
+    networks:
+      - sausage-store
+  backend-report:
+    image: ${CI_REGISTRY_IMAGE}/sausage-backend-report:$VERSION
+    container_name: sausage-backend-report
+    environment:
+      DB: ${DB}
+      PORT: ${PORT}
+    ports:
+      - "8080:8080"
+    networks:
+      - sausage-store
+  frontend:
+    image: $CI_REGISTRY_IMAGE/sausage-frontend:$VERSION
+    container_name: sausage-frontend
+    ports:
+      - "80:80"
+    networks:
+      - sausage-store
+
+networks:
+  sausage-store:

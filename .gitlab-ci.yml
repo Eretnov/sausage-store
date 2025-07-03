@@ -7,7 +7,8 @@ frontend:
     include: "/frontend/.gitlab-ci.yml"
     strategy: depend
   rules:
-    - changes:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      changes:
       - "frontend/**/*"
 
 backend:
@@ -16,5 +17,16 @@ backend:
     include: "/backend/.gitlab-ci.yml"
     strategy: depend
   rules:
-    - changes:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      changes:
       - "backend/**/*"
+
+backend-report:
+  stage: module-pipelines
+  trigger:
+    include: "/backend-report/.gitlab-ci.yml"
+    strategy: depend
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      changes:
+      - "backend-report/**/*"
