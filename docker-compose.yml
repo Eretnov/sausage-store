@@ -7,7 +7,9 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATA_MONGODB_URI: ${SPRING_DATA_MONGODB_URI}
-      VAULT_TOKEN: ${VAULT_TOKEN}
+      VAULT_TOKEN: ${VAULT_TOKEN} 
+      REPORT_PATH: /var/log
+      LOG_PATH: /var/log
     restart: always
     networks:
       - sausage-store
