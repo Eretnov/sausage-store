@@ -122,19 +122,18 @@ deploy-image-frontend:
   image: docker:latest
   before_script:
     - apk update
-    - apk add docker-compose
+    - apk add docker-cli-compose openssh-client
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    - docker context create remote --docker host=${REMOTE_HOST}
+    - docker context create remote --description "remote ssh" --docker "host=ssh://${DEV_USER}@${DEV_HOST}"
   script:
     - docker context use remote  
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    - docker rm -f sausage-frontend || true
-    - docker-compose -f docker-compose.yml up -d frontend
+    - docker compose up frontend -d --pull "always" --force-recreate
   needs:
     - release-image-frontend
   when: manual
