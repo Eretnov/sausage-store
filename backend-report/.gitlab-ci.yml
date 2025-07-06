@@ -100,10 +100,9 @@ deploy-image-backend-report:
     - chmod 644 ~/.ssh/known_hosts
     - docker context create remote --description "remote ssh" --docker "host=ssh://${DEV_USER}@${DEV_HOST}"
   script:
-    - echo "REPORT_PATH=/var/www-data/htdocs" >> deploy.env
     - docker context use remote
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    - docker compose --env-file deploy.env up backend-report -d --pull "always" --force-recreate
+    - docker compose up backend-report -d --pull "always" --force-recreate
   needs:
     - release-image-backend-report
   when: manual
