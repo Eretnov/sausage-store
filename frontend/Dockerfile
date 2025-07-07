@@ -5,10 +5,9 @@ COPY . .
 RUN npm install \
     && npm run build
 
-FROM nginx:stable-alpine3.17-slim
+FROM nginxproxy/nginx-proxy:1.7-alpine
 ARG VERSION=${VERSION}
 WORKDIR /app
-COPY ./default.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /usr/src/app/dist/frontend ./frontend
+COPY ./nginx.tmpl /app/nginx.tmpl
+COPY --from=builder /usr/src/app/dist/frontend /usr/share/nginx/html
 EXPOSE 80 
-

@@ -136,4 +136,4 @@ deploy-image-frontend:
     - docker compose up frontend -d --pull "always" --force-recreate
   needs:
     - release-image-frontend
-  when: manual
+  # when: manual

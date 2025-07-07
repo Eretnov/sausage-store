@@ -154,7 +154,7 @@ deploy-image-backend:
   script:
     - docker context use remote
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    - docker compose up backend -d --pull "always" --force-recreate
+    - docker compose up backend -d --scale backend=2 --pull "always" --force-recreate
   needs:
     - release-image-backend
-  when: manual
+  # when: manual
