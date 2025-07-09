@@ -163,4 +163,4 @@ deploy-image-backend:
     - docker compose stop backend-${ACTIVE} 
   needs:
     - release-image-backend
-  # when: manual test
+  when: manual

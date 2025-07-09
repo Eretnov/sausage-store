@@ -88,7 +88,7 @@ release-image-backend-report:
 
 deploy-image-backend-report:
   stage: deploy
-  image: docker:latest
+  image: docker:24.0.7-alpine3.19
   before_script:
     - apk update
     - apk add docker-cli-compose openssh-client 
