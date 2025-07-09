@@ -1,19 +1,30 @@
-services:
-  backend:
-    image: ${CI_REGISTRY_IMAGE}/sausage-backend:$VERSION
-    environment:
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATA_MONGODB_URI: ${SPRING_DATA_MONGODB_URI}
-      VAULT_TOKEN: ${VAULT_TOKEN} 
-      VIRTUAL_HOST: "backend"
-      VIRTUAL_PORT: "8080"
-      REPORT_PATH: /var/sausage-store/reports
-      LOG_PATH: /var/sausage-store/logs
-    restart: always
-    networks:
+x-backend-config: &backend
+  image: ${CI_REGISTRY_IMAGE}/sausage-backend:$VERSION
+  environment:
+    SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+    SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+    SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+    SPRING_DATA_MONGODB_URI: ${SPRING_DATA_MONGODB_URI}
+    VAULT_TOKEN: ${VAULT_TOKEN} 
+    VIRTUAL_HOST: "backend"
+    VIRTUAL_PORT: "8080"
+    REPORT_PATH: /var/sausage-store/reports
+    LOG_PATH: /var/sausage-store/logs
+  restart: always
+  healthcheck:
+    test: curl --fail -s http://localhost:8080/actuator/health
+    interval: 30s
+    timeout: 10s
+    start_period: 20s
+    retries: 6 
+  networks:
       - sausage-store
+
+services:
+  backend-blue:
+    <<: *backend
+  backend-green:
+    <<: *backend
   backend-report:
     image: ${CI_REGISTRY_IMAGE}/sausage-backend-report:$VERSION
     container_name: sausage-backend-report

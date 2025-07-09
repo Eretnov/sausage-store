@@ -140,7 +140,7 @@ deploy:
 
 deploy-image-backend:
   stage: deploy
-  image: docker:latest
+  image: docker:24.0.7-alpine3.19
   before_script:
     - apk update
     - apk add docker-cli-compose openssh-client
@@ -154,7 +154,13 @@ deploy-image-backend:
   script:
     - docker context use remote
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    - docker compose up backend -d --scale backend=2 --pull "always" --force-recreate
+    - export ACTIVE=$([ -n "$(docker ps --filter 'name=sausage-store-backend-blue' -q)" ] && echo "blue" || echo "green")
+    - export IDLE=$([ "$ACTIVE" = "blue" ] && echo "green" || echo "blue")
+    - docker compose stop backend-${IDLE} || true
+    - docker compose pull backend-${IDLE}
+    - docker compose up backend-${IDLE} --scale backend-${IDLE}=2 -d --force-recreate
+    - timeout 120 sh -c 'until ! docker ps --filter name=sausage-store-backend-${IDLE} -q | xargs docker inspect -f "{{.State.Health.Status}}" | grep -qv "^healthy$"; do sleep 5; done'
+    - docker compose stop backend-${ACTIVE} 
   needs:
     - release-image-backend
-  # when: manual
+  # when: manual test
